@@ -1,0 +1,133 @@
+{
+  "info": {
+    "name": "execo66-core",
+    "version": "1.0.0",
+    "authentication": "session"
+  },
+  "paths": {
+    "/auth/google": {
+      "get": {
+        "restricted-by": "none",
+        "summary": "Redirect to https://accounts.google.com/o/oauth2/v2/auth"
+      }
+    },
+    "/auth/google/callback": {
+      "get": {
+        "query_params": ["code", "error"],
+        "summary": "Request made by Google server"
+      }
+    },
+    "/assigned-assignments": {
+      "get": {
+        "restricted-by": "user-student",
+        "summary": "Get all user assignments",
+        "response": {
+          "200": { "body": { "assignments": [] } },
+          "403": {
+            "body": { "reason": "User type does not have assigned assignments" }
+          }
+        }
+      },
+      "post": {
+        "restricted-by": "user-student",
+        "summary": "Add user to assignment",
+        "request-example": { "body": { "assignmentId": "abc-123" } },
+        "response": {
+          "201": {
+            "headers": [
+              { "Location": "https://example.com/user-assignments/$id" }
+            ]
+          },
+          "403": {
+            "body": { "reason": "User type cannot add assigned assignments" }
+          }
+        }
+      }
+    },
+    "/assigned-assignments/$id": {
+      "get": {
+        "restricted-by": "user-student",
+        "summary": "Get specific user assignment",
+        "response": {
+          "200": { "body": {} },
+          "404": { "body": { "reason": "Invalid assignment" } },
+          "403": {
+            "body": { "reason": "User cannot access assignments" }
+          }
+        }
+      }
+    },
+    "/owned-assignments": {
+      "get": {
+        "restricted-by": "user-teacher",
+        "summary": "Get all assignemts owned by the teacher",
+        "response": {
+          "200": { "body": { "ownedAssignments": [] } },
+          "403": {
+            "body": { "reason": "User type does not have owned assignments" }
+          }
+        }
+      },
+      "post": {
+        "restricted-by": "user-teacher",
+        "summary": "Create assignment",
+        "response": {
+          "201": {
+            "headers": [
+              { "Location": "https://example.com/owned-assignments/$id" }
+            ]
+          },
+          "403": { "body": { "reason": "User type cannot create assignments" } }
+        }
+      }
+    },
+    "/owned-assignments/$aId": {
+      "get": {
+        "restricted-by": "user-teacher",
+        "summary": "Get specific user owned assignment",
+        "response": {
+          "200": { "body": {} },
+          "404": { "body": { "reason": "Invalid assignment" } },
+          "403": { "body": { "reason": "User cannot access assignment" } }
+        }
+      }
+    },
+    "/submissions": {
+      "post": {
+        "restricted-by": "user-student",
+        "summary": "Create submission with $sId for assignment $aId",
+        "request-example": { "body": { "assignmentId": "$aId" } },
+        "response": {
+          "201": {
+            "headers": [
+              {
+                "Location": "https://example.com/user-assignments/$aId/submissions/$sId"
+              }
+            ]
+          },
+          "404": { "body": { "reason": "Invalid assignment" } },
+          "403": {
+            "body": {
+              "reason": "User cannot access assignment or user type cannot create submission"
+            }
+          }
+        }
+      }
+    },
+    "/owned-assigments/$aId/submissions": {
+      "get": {
+        "restricted-by": "user-teacher",
+        "summary": "Get all submissions for assignment $aId",
+        "response": {
+          "200": { "body": { "submissions": [] } },
+          "404": { "body": { "reason": "Invalid assignment" } },
+          "403": {
+            "body": {
+              "reason": "User cannot access either assignment or submissions"
+            }
+          }
+        }
+      }
+    }
+  }
+}
